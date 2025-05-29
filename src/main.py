@@ -4,7 +4,7 @@ from file_utils import process_photos
 
 def main():
     init_db()
-    process_photos('votre_dossier')
+    process_photos('/home/christophe/Téléchargements/2025 Schneider Electric Marathon de Paris - Bib 71471')
     find_duplicates()
     close_db()
 

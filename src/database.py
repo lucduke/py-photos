@@ -11,6 +11,7 @@ def init_db():
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         file_path TEXT NOT NULL,
         file_hash TEXT NOT NULL,
+        file_size INTEGER NOT NULL,
         exif_data TEXT,
         UNIQUE(file_hash)
     )
