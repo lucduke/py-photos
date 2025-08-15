@@ -39,8 +39,8 @@ py-photos/
 │   ├── main.py              # Point d'entrée principal
 │   └── py_photos/           # Package principal
 │       ├── __init__.py      # Fichier d'initialisation du package
-│       ├── car_recognition.py # Module principal de reconnaissance
-│       └── commands.py      # Commandes du programme
+│       ├── commands.py      # Commandes du programme
+│       └── models.py        # Module contenant les modèles de données
 ├── photos/                  # Dossier des photos à analyser
 ├── converted_jpg/           # Dossier des fichiers RAW convertis
 ├── car_numbers_results.txt  # Résultats de la reconnaissance
