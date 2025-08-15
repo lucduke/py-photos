@@ -1,41 +1,62 @@
-# Photo Duplicate Finder
+# py-photos
 
-Une application Python pour identifier les doublons dans une bibliothèque de photos en utilisant l'empreinte numérique des fichiers et les métadonnées EXIF.
+Un package Python pour la reconnaissance de numéros de voitures dans des photos via l'API Claude d'Anthropic.
+
+## Description
+
+Ce projet permet d'automatiser la reconnaissance des numéros de voitures sur des photos de courses automobiles en utilisant l'API Claude d'Anthropic. Il supporte les formats d'image JPEG, PNG, WEBP ainsi que les formats RAW (CR3, CR2, ARW, NEF, ORF, DNG).
+
+## Fonctionnalités
+
+- Reconnaissance de numéros de voitures via l'API Claude
+- Conversion des fichiers RAW en JPEG pour le traitement
+- Déplacement des photos dans des sous-répertoires selon le numéro de voiture
+- Support de plusieurs formats d'image
+- Configuration via des variables d'environnement
 
 ## Installation
 
-1. Clonez le dépôt.
-2. Installez les dépendances avec `pip install -r requirements.txt`.
+```bash
+pip install -r requirements.txt
+```
 
 ## Utilisation
 
-1. Modifiez le chemin du dossier dans `src/main.py`.
-2. Exécutez l'application avec `python src/main.py`.
+```bash
+python src/main.py --car-recognition
+python src/main.py --move-photo
+```
 
-## Tests
+## Configuration
 
-Exécutez les tests avec `python -m unittest discover tests`.
+Le projet utilise un fichier `.env` pour la configuration. Un exemple de fichier est fourni dans `config.env`.
 
 ## Structure du projet
 
-```txt
-/photo_duplicate_finder
-│
-├── /src
-│   ├── __init__.py
-│   ├── main.py          # Point d'entrée de l'application
-│   ├── database.py      # Gestion de la base de données
-│   ├── file_utils.py    # Fonctions utilitaires pour les fichiers
-│   ├── exif_utils.py    # Fonctions utilitaires pour les métadonnées EXIF
-│   └── duplicate_finder.py # Logique de recherche de doublons
-│
-├── /tests
-│   ├── __init__.py
-│   ├── test_database.py
-│   ├── test_file_utils.py
-│   ├── test_exif_utils.py
-│   └── test_duplicate_finder.py
-│
-├── requirements.txt     # Dépendances du projet
-└── README.md            # Documentation du projet
 ```
+py-photos/
+├── src/
+│   ├── main.py              # Point d'entrée principal
+│   └── py_photos/           # Package principal
+│       ├── __init__.py      # Fichier d'initialisation du package
+│       ├── car_recognition.py # Module principal de reconnaissance
+│       └── commands.py      # Commandes du programme
+├── photos/                  # Dossier des photos à analyser
+├── converted_jpg/           # Dossier des fichiers RAW convertis
+├── car_numbers_results.txt  # Résultats de la reconnaissance
+├── config.env               # Fichier de configuration
+├── requirements.txt         # Dépendances du projet
+└── setup.py                # Script d'installation
+```
+
+## Dépendances
+
+- anthropic
+- python-dotenv
+- pillow
+- rawpy
+- imageio
+
+## Licence
+
+MIT

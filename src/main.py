@@ -1,82 +1,90 @@
+#!/usr/bin/env python3
 """
-Point d'entrée principal de l'application de gestion de photos.
-Fournit une interface en ligne de commande (CLI) pour interagir avec l'outil.
+Point d'entrée principal du programme de reconnaissance de numéros de voitures
+
+Usage:
+    python src/main.py --car-recognition
+    python src/main.py --move-photo
 """
 
-import argparse
+#from py_photos.car_recognition import main
+
 import logging
-import configparser
-from pathlib import Path
+import argparse
 
-from photo_manager import PhotoManager
+# Installation des dépendances requises
+# pip install anthropic python-dotenv pillow rawpy imageio
+
+# These imports are needed for the package structure to work properly
+#from .models import Config, CarNumberRecognizer, load_config
+from py_photos.commands import run_car_recognition, run_move_photos
+from py_photos.models import load_config
 
 # Configuration du logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S'
+    handlers=[
+        logging.FileHandler('car_recognition.log'),
+        logging.StreamHandler()
+    ]
 )
 
-
-def get_db_path_from_config() -> Path:
-    """Lit le fichier de configuration et retourne le chemin de la DB."""
-    config = configparser.ConfigParser()
-    # Le chemin est relatif au répertoire parent du répertoire 'src'
-    config_path = Path(__file__).resolve().parent.parent / 'config.ini'
+def parse_args() -> argparse.Namespace:
+    """
+    Parse les arguments de ligne de commande
     
-    if not config_path.exists():
-        raise FileNotFoundError("Le fichier 'config.ini' est introuvable.")
-        
-    config.read(config_path)
-    db_path_str = config.get('database', 'path', fallback='default_photo_library.db')
-    return Path(db_path_str)
+    Returns:
+        argparse.Namespace: Arguments parsés
+    """
+    parser = argparse.ArgumentParser(
+        description="Reconnaissance de numéros de voitures dans des photos"
+    )
+    
+    parser.add_argument(
+        "--car-recognition",
+        action="store_true",
+        help="Lance la reconnaissance des numéros de voitures"
+    )
+    
+    parser.add_argument(
+        "--move-photo",
+        action="store_true",
+        help="Déplace les photos RAW dans des sous-répertoires selon le numéro de voiture"
+    )
+    
+    return parser.parse_args()
 
 
 def main():
-    """
-    Fonction principale qui parse les arguments de la CLI et lance les actions.
-    """
-    parser = argparse.ArgumentParser(
-        description="Outil d'analyse de photos pour trouver des doublons.",
-        epilog="Exemple: python src/main.py scan /path/to/your/photos"
-    )
+    """Fonction principale"""
+    # Parse les arguments de ligne de commande
+    args = parse_args()
+    # Pour le debug (a conserver)
+    #args.car_recognition = True
     
-    # Création de sous-commandes pour les différentes actions
-    subparsers = parser.add_subparsers(dest='command', required=True, help='Action à effectuer')
-
-    # Sous-commande 'scan'
-    scan_parser = subparsers.add_parser('scan', help='Scanner un répertoire et ajouter les photos à la base de données.')
-    scan_parser.add_argument(
-        'directory',
-        type=Path,
-        help='Le répertoire contenant les photos à scanner.'
-    )
-
-    # Sous-commande 'find-duplicates'
-    dups_parser = subparsers.add_parser('find-duplicates', help='Trouver et afficher les doublons exacts dans la bibliothèque.')
-
-    args = parser.parse_args()
-
-    # Initialisation du PhotoManager avec le chemin de la DB depuis la config
-    try:
-        db_path = get_db_path_from_config()
-    except (FileNotFoundError, configparser.Error) as e:
-        logging.error(f"Erreur de configuration : {e}")
+    # Si aucun argument n'est fourni, affiche l'aide
+    if not args.car_recognition and not args.move_photo:
+        print("Veuillez spécifier une option : --car-recognition ou --move-photo")
         return
+    
+    try:
+        # Chargement de la configuration
+        config = load_config()
+        logging.info("Configuration chargée avec succès")
+        
+        if args.car_recognition:
+            # Exécution de la reconnaissance des numéros de voitures
+            run_car_recognition(config)
+        
+        if args.move_photo:
+            # Déplacement des photos selon les numéros de voiture
+            run_move_photos(config)
+        
+    except Exception as e:
+        logging.error(f"Erreur fatale: {e}")
+        raise
 
-    manager = PhotoManager(db_path)
-
-    if args.command == 'scan':
-        if not args.directory.is_dir():
-            logging.error(f"Le répertoire spécifié n'existe pas : {args.directory}")
-            return
-        manager.process_directory(args.directory)
-        # Après un scan, on propose de chercher les doublons
-        manager.find_and_report_duplicates()
-
-    elif args.command == 'find-duplicates':
-        manager.find_and_report_duplicates()
-
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
+
