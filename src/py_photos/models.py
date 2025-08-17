@@ -25,6 +25,8 @@ class Config:
     api_key: str
     photos_folder: str
     output_file: str
+    xmp_folder: str
+    xmp_dc_description: str
     max_image_size: int = 1920  # Taille max en pixels
     convert_raw_size: int = 1024  # Taille pour conversion RAW
     converted_folder: str = "./converted_jpg"  # Dossier pour les JPG convertis
@@ -76,6 +78,8 @@ def load_config() -> Config:
     converted_folder = script_dir.parent.parent / os.getenv('CONVERTED_FOLDER', './converted_jpg')
     convert_raw_size = int(os.getenv('CONVERT_RAW_SIZE', '1024'))
     keep_converted = os.getenv('KEEP_CONVERTED', 'true').lower() == 'true'
+    xmp_folder = script_dir.parent.parent / os.getenv('XMP_FOLDER', './xmp_files')
+    xmp_dc_description = os.getenv('XMP_DC_DESC', 'XXX')
     
     return Config(
         api_key=api_key,
@@ -83,7 +87,9 @@ def load_config() -> Config:
         output_file=output_file,
         converted_folder=converted_folder,
         convert_raw_size=convert_raw_size,
-        keep_converted=keep_converted
+        keep_converted=keep_converted,
+        xmp_folder=xmp_folder,
+        xmp_dc_description=xmp_dc_description
     )
 
 

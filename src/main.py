@@ -17,7 +17,7 @@ import argparse
 
 # These imports are needed for the package structure to work properly
 #from .models import Config, CarNumberRecognizer, load_config
-from py_photos.commands import run_car_recognition, run_move_photos
+from py_photos.commands import run_car_recognition, run_move_photos, run_update_xmp
 from py_photos.models import load_config
 
 # Configuration du logging
@@ -52,7 +52,13 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Déplace les photos RAW dans des sous-répertoires selon le numéro de voiture"
     )
-    
+
+    parser.add_argument(
+        "--update-xmp",
+        action="store_true",
+        help="Met à jour les métadonnées XMP des photos"
+    )
+
     return parser.parse_args()
 
 
@@ -61,11 +67,11 @@ def main():
     # Parse les arguments de ligne de commande
     args = parse_args()
     # Pour le debug (a conserver)
-    #args.car_recognition = True
-    
+    #args.update_xmp = True
+
     # Si aucun argument n'est fourni, affiche l'aide
-    if not args.car_recognition and not args.move_photo:
-        print("Veuillez spécifier une option : --car-recognition ou --move-photo")
+    if not args.car_recognition and not args.move_photo and not args.update_xmp:
+        print("Veuillez spécifier une option : --car-recognition ou --move-photo ou --update-xmp")
         return
     
     try:
@@ -80,7 +86,11 @@ def main():
         if args.move_photo:
             # Déplacement des photos selon les numéros de voiture
             run_move_photos(config)
-        
+
+        if args.update_xmp:
+            # Mise à jour des métadonnées XMP
+            run_update_xmp(config)
+
     except Exception as e:
         logging.error(f"Erreur fatale: {e}")
         raise
