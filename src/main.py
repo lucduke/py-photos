@@ -17,7 +17,7 @@ import argparse
 
 # These imports are needed for the package structure to work properly
 #from .models import Config, CarNumberRecognizer, load_config
-from py_photos.commands import run_car_recognition, run_move_photos, run_update_xmp
+from py_photos.commands import run_calculate_hash, run_car_recognition, run_move_photos, run_update_xmp
 from py_photos.models import load_config
 
 # Configuration du logging
@@ -59,6 +59,12 @@ def parse_args() -> argparse.Namespace:
         help="Met à jour les métadonnées XMP des photos"
     )
 
+    parser.add_argument(
+        "--calculate-hash",
+        action="store_true",
+        help="Calcule le hash des fichiers photo (fonctionnalité à implémenter)"
+    )
+
     return parser.parse_args()
 
 
@@ -70,8 +76,8 @@ def main():
     #args.update_xmp = True
 
     # Si aucun argument n'est fourni, affiche l'aide
-    if not args.car_recognition and not args.move_photo and not args.update_xmp:
-        print("Veuillez spécifier une option : --car-recognition ou --move-photo ou --update-xmp")
+    if not args.car_recognition and not args.move_photo and not args.update_xmp and not args.calculate_hash:
+        print("Veuillez spécifier une option : --car-recognition ou --move-photo ou --update-xmp ou --calculate-hash")
         return
     
     try:
@@ -80,16 +86,20 @@ def main():
         logging.info("Configuration chargée avec succès")
         
         if args.car_recognition:
-            # Exécution de la reconnaissance des numéros de voitures
+            logging.info("Démarrage de la reconnaissance des numéros de voitures")
             run_car_recognition(config)
         
         if args.move_photo:
-            # Déplacement des photos selon les numéros de voiture
+            logging.info("Déplacement des photos selon les numéros de voiture")
             run_move_photos(config)
 
         if args.update_xmp:
-            # Mise à jour des métadonnées XMP
+            logging.info("Mise à jour des métadonnées XMP")
             run_update_xmp(config)
+        
+        if args.calculate_hash:
+            logging.info("Calcul du hash des fichiers photo")
+            run_calculate_hash(config)
 
     except Exception as e:
         logging.error(f"Erreur fatale: {e}")

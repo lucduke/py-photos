@@ -17,7 +17,8 @@ from PIL import Image, ImageOps
 import rawpy
 import re
 import tempfile
-
+import xml.etree.ElementTree as ET
+import imagehash
 
 @dataclass
 class Config:
@@ -383,3 +384,62 @@ class CarNumberRecognizer:
         
         if self.config.keep_converted and converted_count > 0:
             logging.info(f"Fichiers JPEG convertis sauvés dans: {self.config.converted_folder}")
+
+class XmpMetadata:
+    """Classe pour mettre à jour les métadonnées XMP des photos"""
+    
+    def __init__(self, config: Config):
+        self.config = config
+    
+    def update_xmp(self):
+        """Met à jour les métadonnées XMP des photos"""
+        xmp_folder = Path(self.config.xmp_folder)
+        if not xmp_folder.exists():
+            raise FileNotFoundError(f"Le dossier XMP {self.config.xmp_folder} n'existe pas")
+        
+        # Parcours des fichiers dans le dossier XMP
+        for xmp_file in xmp_folder.glob("*.xmp"):
+            try:
+                # Lecture du fichier XMP
+                with open(xmp_file, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                
+                # Ajout des espaces de noms pour le parsing XML
+                namespaces = {
+                    'x': 'adobe:ns:meta/',
+                    'rdf': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
+                    'photoshop': 'http://ns.adobe.com/photoshop/1.0/',
+                    'dc': 'http://purl.org/dc/elements/1.1/',
+                    'Iptc4xmpCore': 'http://iptc.org/std/Iptc4xmpCore/1.0/xmlns/',
+                    'xmpRights': 'http://ns.adobe.com/xap/1.0/rights/',
+                    'plus_1_': 'http://ns.useplus.org/ldf/xmp/1.0/ImageCreator'
+                }
+
+                # Enregistrement des espaces de noms
+                for prefix, uri in namespaces.items():
+                    ET.register_namespace(prefix, uri)
+    
+            except Exception as e:
+                logging.error(f"Erreur lors de la mise à jour de {xmp_file.name}: {e}")
+
+class ImageHashCalculator:
+    """Classe pour calculer le hash des fichiers photo"""
+    
+    def __init__(self, config: Config):
+        self.config = config
+    
+    def calculate_hashes(self):
+        """Calcule le hash des fichiers photo"""
+        photos_path = Path(self.config.photos_folder)
+        if not photos_path.exists():
+            raise FileNotFoundError(f"Le dossier {self.config.photos_folder} n'existe pas")
+        
+        # Parcours des fichiers image
+        for image_file in photos_path.iterdir():
+            if image_file.suffix.lower() in self.config.supported_formats:
+                try:
+                    with Image.open(image_file) as img:
+                        hash_value = imagehash.average_hash(img)
+                        logging.info(f"Hash pour {image_file.name}: {hash_value}")
+                except Exception as e:
+                    logging.error(f"Erreur lors du calcul du hash pour {image_file.name}: {e}")

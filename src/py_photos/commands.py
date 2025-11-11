@@ -5,7 +5,7 @@ Module pour gérer les différentes commandes du programme de reconnaissance de 
 
 import logging
 from pathlib import Path
-from .models import Config, CarNumberRecognizer
+from .models import Config, CarNumberRecognizer, ImageHashCalculator
 import xml.etree.ElementTree as ET
 
 
@@ -148,13 +148,13 @@ def run_update_xmp(config: Config) -> None:
                 if rdf_description is not None:
                     # Mise à jour des balises XMP avec des données prédéfinies
                     # photoshop:City
-                    city_value = "Le Mans"
+                    city_value = "Tashkent"
                     rdf_description.set(f"{{{namespaces['photoshop']}}}City", city_value)
                     # photoshop:Country
-                    country_value = "France"
+                    country_value = "Ouzbékistan"
                     rdf_description.set(f"{{{namespaces['photoshop']}}}Country", country_value)
                     # photoshop:Headline
-                    headline_value = "24H du Mans 2025"
+                    headline_value = "Vacances 2025 Ouzbékistan"
                     rdf_description.set(f"{{{namespaces['photoshop']}}}Headline", headline_value)
                     
                     # dc:rights - mise à jour de la valeur dans rdf:li
@@ -328,4 +328,20 @@ def run_update_xmp(config: Config) -> None:
 
     except Exception as e:
         logging.error(f"Erreur lors de la mise à jour des métadonnées XMP: {e}")
+        raise
+
+def run_calculate_hash(config: Config) -> None:
+    """
+    Calcule le hash des fichiers photo à partir de la librairie imagehash (fonctionnalité à implémenter)
+
+    Args:
+        config: Configuration du script
+    """
+    try:
+        logging.info("Calcul du hash des fichiers photo")
+        hash_calculator = ImageHashCalculator(config)
+        hash_calculator.calculate_hashes()
+
+    except Exception as e:
+        logging.error(f"Erreur lors du calcul du hash des fichiers photo: {e}")
         raise
